@@ -1,0 +1,10 @@
+server:
+  servlet:
+    context-path: /
+  port: 8080
+
+spring:
+  data:
+    elasticsearch:
+      cluster-name: jihuan  #ES集群控制台上的集群名称
+      cluster-nodes: 127.0.0.1:9300 # 程序连接es的端口号是9300

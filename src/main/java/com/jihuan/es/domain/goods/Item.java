@@ -17,19 +17,19 @@ public class Item {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "ik_max_word")
+    @Field(type = FieldType.text, analyzer = "ik_max_word")
     private String title; //标题
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.keyword)
     private String category;// 分类
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.keyword)
     private String brand; // 品牌
 
     @Field(type = FieldType.Double)
     private Double price; // 价格
 
-    @Field(index = false, type = FieldType.Keyword)
+    @Field(index = false, type = FieldType.keyword)
     private String images; // 图片地址
 
 }

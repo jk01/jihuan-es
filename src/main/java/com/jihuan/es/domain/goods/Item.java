@@ -32,4 +32,14 @@ public class Item {
     @Field(index = false, type = FieldType.keyword)
     private String images; // 图片地址
 
+    public Item(Long id,String title,String category,String brand,Double price,String images){
+        this.id=id;
+        this.title=title;
+        this.category=category;
+        this.brand=brand;
+        this.price=price;
+        this.images=images;
+
+    }
+
 }

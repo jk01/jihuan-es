@@ -1,10 +1,21 @@
 package com.jihuan.es;
 
+import com.alibaba.fastjson.JSON;
 import com.jihuan.es.api.ItemRepository;
 import com.jihuan.es.domain.goods.Item;
+import com.jihuan.es.domain.people.Person;
+import com.jihuan.es.service.people.PeopleService;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.LocalTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +23,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Iterator;
+import java.net.InetAddress;
+import java.util.*;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -26,6 +41,64 @@ public class JihuanEsApplicationTests {
 
 	@Autowired
 	private ItemRepository itemRepository;
+
+	@Autowired
+	private PeopleService peopleService;
+
+
+
+	@Test
+	public void createIndexOfPeople(){
+		List<Person> personList = new ArrayList<>();
+		Person p1 = new Person(1,"xiaosong","13612341234");
+		personList.add(p1);
+		peopleService.batchInsert(personList);
+	}
+
+	@Test
+	public void creatIndexOfPeople2() throws  Exception{
+
+//		TransportAddress transportAddress = new LocalTransportAddress(InetAddress.getByName("127.0.0.1"), 9300)
+		TransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300);
+
+		Settings settings = Settings.builder()
+				.put("cluster.name", "jihuan").build();
+
+		TransportClient client = new PreBuiltTransportClient(settings)
+				.addTransportAddress(transportAddress);
+
+		BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+		bulkRequest.add(client.prepareIndex("people", "_doc", "2")
+				.setSource(jsonBuilder()
+						.startObject()
+						.field("name", "xiaosong")
+						.field("country", "china")
+						.field("age", 20)
+						.field("date", "2019-09-01")
+						.endObject()
+				)
+		);
+
+		BulkResponse bulkResponse = bulkRequest.get();
+
+		client.close();
+
+		Map<String, String> data = new HashMap<>();
+		data.put("name", "localhost");
+		data.put("country", "2019-04-07 23:05:04");
+		data.put("","20");
+		data.put("date","1992-09-01");
+
+		IndexQuery indexQuery = new IndexQuery();
+		indexQuery.setId("22");
+		indexQuery.setSource(JSON.toJSONString(data));
+		indexQuery.setIndexName("people");
+		indexQuery.setType("_doc");
+
+		esTemplate.index(indexQuery);
+
+	}
 
 	@Test
 	public void contextLoads() {
